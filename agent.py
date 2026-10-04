@@ -1,8 +1,11 @@
 import json
 
+from context import reminder
 from llm import SYSTEM_PROMPT, call_llm
 from tools import TOOLS
 from ui import ui
+
+from openai.types.chat import ChatCompletionMessageToolCall
 
 ui.banner()
 
@@ -17,7 +20,7 @@ while True:
 
     while True:
         with ui.working():
-            message, usage = call_llm(messages)
+            message, usage = call_llm(messages + [reminder()])
 
         messages.append(message.model_dump(exclude_none=True))
         ui.usage(usage)
@@ -29,9 +32,12 @@ while True:
             break
 
         for tool_call in message.tool_calls:
-            args = json.loads(tool_call.function.arguments)
-            result = TOOLS[tool_call.function.name](**args)
-            ui.tool(tool_call.function.name, args, result)
+            if isinstance(tool_call, ChatCompletionMessageToolCall):
+                args = json.loads(tool_call.function.arguments)
+                result = TOOLS[tool_call.function.name](**args)
+                ui.tool(tool_call.function.name, args, result)
+            else:
+                print("Custom tool call detected")
 
             messages.append({
                 "role": "tool",

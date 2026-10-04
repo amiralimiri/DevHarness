@@ -1,8 +1,11 @@
 import json
 import os
 from dotenv import load_dotenv
-from openai import OpenAI
 
+from openai import OpenAI
+from openai.types.chat import ChatCompletionMessageToolCall
+
+from skills import skills_prompt
 from tools import TOOLS, TOOL_SCHEMAS
 
 load_dotenv()
@@ -12,12 +15,21 @@ client = OpenAI(
     api_key=os.environ["API_Key_AR"],
 )
 
+# writing_line = "\nUse write_file to create files and str_replace to edit them."
+writing_line = ""
+
+
 SYSTEM_PROMPT = f"""
 You are a coding agent. Your job is to code. Always code.
-Use the bash tool to inspect files.
+Use the bash tool to inspect files.{writing_line}
 Answer back to the user once exploration is done.
 
 Your current working directory is: {os.getcwd()}
+
+You have skills available. Each one is a set of instructions for a task.
+If a skill matches what the user wants, call read_skill first and follow it.
+
+{skills_prompt()}
 """
 
 
@@ -25,7 +37,7 @@ def call_llm(messages):
     response = client.chat.completions.create(
         model="deepseek-v4-flash",
         messages=messages,
-        tools=TOOL_SCHEMAS,
+        tools=TOOL_SCHEMAS, # type: ignore
     )
 
     message = response.choices[0].message
@@ -55,9 +67,12 @@ if __name__ == "__main__":
 
     if message.tool_calls:
         tool_call = message.tool_calls[0]
-        args = json.loads(tool_call.function.arguments)
-        result = TOOLS[tool_call.function.name](**args)
-        print("Tool: ", tool_call.function.name, args)
-        print(result, "\n")
+        if isinstance(tool_call, ChatCompletionMessageToolCall):
+            args = json.loads(tool_call.function.arguments)
+            result = TOOLS[tool_call.function.name](**args)
+            print("Tool: ", tool_call.function.name, args)
+            print(result, "\n")
+        else:
+            print("Custom tool call detected")
 
     print(usage)
