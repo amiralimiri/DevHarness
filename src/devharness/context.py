@@ -9,6 +9,9 @@ import subprocess
 from datetime import datetime
 from pathlib import Path
 
+from devharness.todos import todos_prompt
+
+
 LABELS = {"M": "modified", "D": "deleted", "A": "added", "??": "new"}
 
 
@@ -32,6 +35,7 @@ def git_state():
         path = line[3:]
         state[path] = (line[:2].strip(), file_hash(path))
     return state
+
 
 LAST_STATE = git_state()
 
@@ -57,6 +61,11 @@ def changes_note():
     )
 
 
+def todos_note():
+    plan = todos_prompt()
+    return f"\n<todos>\n{plan}\n</todos>" if plan else ""
+
+
 def reminder():
     """The block we append to the messages on every turn."""
     return {
@@ -65,7 +74,7 @@ def reminder():
             "<env>\n"
             f"time: {datetime.now():%Y-%m-%d %H:%M}\n"
             f"git branch: {git('branch --show-current').strip() or '(detached)'}\n"
-            "</env>" + changes_note()
+            "</env>" + todos_note() + changes_note()
         ),
     }
     

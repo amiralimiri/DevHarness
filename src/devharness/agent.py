@@ -6,6 +6,7 @@ import devharness.commands as commands
 import devharness.session as session
 from devharness.context import reminder
 from devharness.llm import SYSTEM_PROMPT, call_llm
+from devharness.todos import active_form
 from devharness.tools import TOOLS
 from devharness.ui import ui
 
@@ -41,7 +42,7 @@ def main():
             injection = reminder()
             ui.injection(injection["content"])
 
-            with ui.working():
+            with ui.working(active_form()):
                 message, usage = call_llm(messages + [injection])
 
             messages.append(message.model_dump(exclude_none=True))
