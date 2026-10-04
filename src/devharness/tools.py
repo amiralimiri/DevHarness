@@ -100,44 +100,44 @@ TOOL_SCHEMAS = [
             },
         },
     },
-    {
-        "type": "function",
-        "function": {
-            "name": "write_file",
-            "description": "Create a file, or overwrite it if it already exists.",
-            "parameters": {
-                "type": "object",
-                "properties": {
-                    "path": {"type": "string", "description": "File to write"},
-                    "content": {"type": "string", "description": "The full contents"},
-                },
-                "required": ["path", "content"],
-            },
-        },
-    },
-    {
-        "type": "function",
-        "function": {
-            "name": "str_replace",
-            "description": (
-                "Replace exact text in a file. old_str must appear exactly once, "
-                "so include surrounding lines if needed."
-            ),
-            "parameters": {
-                "type": "object",
-                "properties": {
-                    "path": {"type": "string", "description": "File to edit"},
-                    "old_str": {"type": "string", "description": "Exact text to find"},
-                    "new_str": {"type": "string", "description": "Text to put in its place"},
-                    "allow_multi_edit": {
-                        "type": "boolean",
-                        "description": "Replace every match instead of failing",
-                    },
-                },
-                "required": ["path", "old_str", "new_str"],
-            },
-        },
-    },
+    # {
+    #     "type": "function",
+    #     "function": {
+    #         "name": "write_file",
+    #         "description": "Create a file, or overwrite it if it already exists.",
+    #         "parameters": {
+    #             "type": "object",
+    #             "properties": {
+    #                 "path": {"type": "string", "description": "File to write"},
+    #                 "content": {"type": "string", "description": "The full contents"},
+    #             },
+    #             "required": ["path", "content"],
+    #         },
+    #     },
+    # },
+    # {
+    #     "type": "function",
+    #     "function": {
+    #         "name": "str_replace",
+    #         "description": (
+    #             "Replace exact text in a file. old_str must appear exactly once, "
+    #             "so include surrounding lines if needed."
+    #         ),
+    #         "parameters": {
+    #             "type": "object",
+    #             "properties": {
+    #                 "path": {"type": "string", "description": "File to edit"},
+    #                 "old_str": {"type": "string", "description": "Exact text to find"},
+    #                 "new_str": {"type": "string", "description": "Text to put in its place"},
+    #                 "allow_multi_edit": {
+    #                     "type": "boolean",
+    #                     "description": "Replace every match instead of failing",
+    #                 },
+    #             },
+    #             "required": ["path", "old_str", "new_str"],
+    #         },
+    #     },
+    # },
     TODO_SCHEMA,
 ]
 

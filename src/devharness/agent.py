@@ -6,6 +6,7 @@ import devharness.commands as commands
 import devharness.session as session
 from devharness.context import reminder
 from devharness.llm import SYSTEM_PROMPT, call_llm
+from devharness.permissions import check
 from devharness.todos import active_form
 from devharness.tools import TOOLS
 from devharness.ui import ui
@@ -61,7 +62,23 @@ def main():
             for tool_call in message.tool_calls:
                 if isinstance(tool_call, ChatCompletionMessageToolCall):
                     args = json.loads(tool_call.function.arguments)
-                    result = TOOLS[tool_call.function.name](**args)
+                    tool_name = tool_call.function.name
+                    
+                    action, reason = check(tool_name, args)
+                    if action == "deny":
+                        result = f"Blocked by policy: {reason}"
+                    elif action == "ask" and not ui.approve(reason):
+                        result = "The user denied this tool call."
+                    elif tool_name not in TOOLS:
+                        result = (
+                            f"Error: tool '{tool_name}' is not available. "
+                            f"Available tools: {list(TOOLS.keys())}"
+                        )
+                    else:
+                        try:
+                            result = TOOLS[tool_call.function.name](**args)
+                        except Exception as e:
+                            result = f"Error running {tool_name}: {type(e).__name__}: {e}"
                     ui.tool(tool_call.function.name, args, result)
                 else:
                     print("Custom tool call detected")

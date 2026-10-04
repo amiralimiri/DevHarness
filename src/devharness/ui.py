@@ -65,6 +65,14 @@ class UI:
                         results.get(call["id"], ""),
                     )
 
+    def approve(self, reason):
+        self.console.print(Padding(Text(reason, style=f"bold {TOOL}"), (1, 0, 0, 2)))
+        try:
+            answer = self.console.input(f"  [bold {USER}]allow? (y/n)>[/] ").strip()
+        except (EOFError, KeyboardInterrupt):
+            return False
+        return answer.lower().startswith("y")
+
     def note(self, text):
         self.console.print(Padding(Text(text, style=MUTED), (1, 0, 0, 2)))
 
