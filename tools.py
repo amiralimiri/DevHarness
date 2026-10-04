@@ -1,34 +1,35 @@
 import subprocess
 
-from context import note_read
 from skills import read_skill
 
 
 def bash(command: str) -> str:
     """Run a shell command and return its combined stdout and stderr."""
     result = subprocess.run(
-        command, shell=True, capture_output=True, text=True, timeout=60
+        command, shell=True, capture_output=True, text=True,
+        encoding="utf-8", errors="replace", timeout=60,
     )
-    return (result.stdout + result.stderr) or "(no output)"
+    stdout = result.stdout or ""
+    stderr = result.stderr or ""
+    return (stdout + stderr) or "(no output)"
 
 
 def read_file(path: str) -> str:
     """Read a file and return its contents."""
-    note_read(path)
-    with open(path) as f:
+    with open(path, encoding="utf-8") as f:
         return f.read()
 
 
 def write_file(path: str, content: str) -> str:
     """Create a file, or overwrite it if it already exists."""
-    with open(path, "w") as f:
+    with open(path, "w", encoding="utf-8") as f:
         f.write(content)
     return f"Wrote {path}"
 
 
 def str_replace(path, old_str, new_str, allow_multi_edit=False):
     """Swap exact text in a file. old_str must match exactly once."""
-    with open(path) as f:
+    with open(path, encoding="utf-8") as f:
         content = f.read()
 
     count = content.count(old_str)
@@ -41,7 +42,7 @@ def str_replace(path, old_str, new_str, allow_multi_edit=False):
             "or set allow_multi_edit to replace them all."
         )
 
-    with open(path, "w") as f:
+    with open(path, "w", encoding="utf-8") as f:
         f.write(content.replace(old_str, new_str))
     return f"Replaced {count} match(es) in {path}"
 
