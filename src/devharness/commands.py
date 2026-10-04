@@ -1,7 +1,7 @@
 """Slash commands. Anything typed starting with / lands here."""
 
-import session
-from ui import ui
+import devharness.session as session
+from devharness.ui import ui
 
 COMMANDS = {
     "/rewind": "jump back to an earlier point in this chat",

@@ -1,18 +1,17 @@
 import json
 import os
-from dotenv import load_dotenv
 
 from openai import OpenAI
 from openai.types.chat import ChatCompletionMessageToolCall
 
-from skills import skills_prompt
-from tools import TOOLS, TOOL_SCHEMAS
+from devharness import config
+from devharness.skills import skills_prompt
+from devharness.tools import TOOLS, TOOL_SCHEMAS
 
-load_dotenv()
-
+# print("########################## ", config.BASE_URL, " ##########################")
 client = OpenAI(
-    base_url=os.environ["BASE_URL_AR"],
-    api_key=os.environ["API_Key_AR"],
+    base_url=config.BASE_URL,
+    api_key=config.API_KEY,
 )
 
 # writing_line = "\nUse write_file to create files and str_replace to edit them."
@@ -35,7 +34,7 @@ If a skill matches what the user wants, call read_skill first and follow it.
 
 def call_llm(messages):
     response = client.chat.completions.create(
-        model="deepseek-v4-flash",
+        model=config.MODEL,
         messages=messages,
         tools=TOOL_SCHEMAS, # type: ignore
     )

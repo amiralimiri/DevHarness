@@ -11,7 +11,7 @@ from pathlib import Path
 
 import pytest
 
-from tools import bash, read_file, write_file
+from devharness.tools import bash, read_file, write_file
 
 
 UTF8_SAMPLE = "سلام 🎉\nnaïve café\n日本語\nÑoño"
@@ -32,7 +32,7 @@ def utf8_file(tmp_path: Path) -> Path:
 @pytest.fixture
 def isolated_session(tmp_path: Path, monkeypatch):
     """Isolate session.py to a temp dir and reset the WRITTEN global."""
-    import session
+    import devharness.session as session
 
     monkeypatch.setattr(session, "SESSION_DIR", tmp_path)
     monkeypatch.setattr(session, "WRITTEN", 0)
@@ -140,10 +140,10 @@ class TestSession:
 class TestContext:
     def test_reminder_returns_dict(self, monkeypatch):
         monkeypatch.setattr(
-            "context.git",
+            "devharness.context.git",
             lambda cmd: "main" if "branch" in cmd else "",
         )
-        from context import reminder
+        from devharness.context import reminder
 
         r = reminder()
         assert isinstance(r, dict)
@@ -152,10 +152,10 @@ class TestContext:
 
     def test_reminder_content_is_string(self, monkeypatch):
         monkeypatch.setattr(
-            "context.git",
+            "devharness.context.git",
             lambda cmd: "main" if "branch" in cmd else "",
         )
-        from context import reminder
+        from devharness.context import reminder
 
         r = reminder()
         assert isinstance(r["content"], str)

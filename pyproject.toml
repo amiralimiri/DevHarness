@@ -1,7 +1,7 @@
 [project]
 name = "devharness"
 version = "0.1.0"
-description = "Add your description here"
+description = "A minimal coding agent"
 readme = "README.md"
 authors = [
     { name = "amiralimiri", email = "amiralimiri3100@gmail.com" }
@@ -9,7 +9,6 @@ authors = [
 requires-python = ">=3.14"
 dependencies = [
     "openai>=3.24.0",
-    "python-dotenv>=1.2.4",
     "pyyaml>=6.0.3",
     "rich>=15.0.0",
 ]
@@ -18,3 +17,10 @@ dependencies = [
 dev = [
     "pytest>=9.1.1",
 ]
+
+[project.scripts]
+devharness = "devharness.agent:main"
+
+[build-system]
+requires = ["uv_build>=0.12.6,<0.13.0"]
+build-backend = "uv_build"

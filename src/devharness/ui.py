@@ -49,6 +49,22 @@ class UI:
             )
         )
 
+    def replay(self, messages):
+        """Redraw a loaded transcript so the screen matches the history."""
+        results = {m["tool_call_id"]: m["content"] for m in messages if m["role"] == "tool"}
+        for message in messages:
+            if message["role"] == "user":
+                self.user(message["content"])
+            elif message["role"] == "assistant":
+                if message.get("content"):
+                    self.agent(message["content"])
+                for call in message.get("tool_calls") or []:
+                    self.tool(
+                        call["function"]["name"],
+                        json.loads(call["function"]["arguments"]),
+                        results.get(call["id"], ""),
+                    )
+
     def note(self, text):
         self.console.print(Padding(Text(text, style=MUTED), (1, 0, 0, 2)))
 

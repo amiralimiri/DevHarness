@@ -4,9 +4,17 @@ import json
 from datetime import datetime
 from pathlib import Path
 
-SESSION_DIR = Path.home() / ".agents" / "sessions"
+def _project_slug() -> str:
+    p = Path.cwd().resolve().as_posix()      
+    p = p.replace(":", "")                   
+    p = p.replace("/", "-")                
+    return p.lstrip("-") or "root"
+
+PROJECT = _project_slug()
+SESSION_DIR = Path.home() / ".agents" / "sessions" / PROJECT
 CURRENT = datetime.now().strftime("%Y%m%d-%H%M%S")
 WRITTEN = 0  # how many messages are already on disk
+
 
 
 def path_for(session_id):
@@ -67,3 +75,7 @@ def all_sessions():
         SESSION_DIR.glob("*.jsonl"), key=lambda p: p.stat().st_mtime, reverse=True
     )
     return [{"id": p.stem, "title": title(load(p.stem))} for p in files]
+
+if __name__ == "__main__":
+    print(PROJECT)
+    

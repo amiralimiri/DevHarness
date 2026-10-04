@@ -1,6 +1,6 @@
 import subprocess
 
-from skills import read_skill
+from devharness.skills import read_skill
 
 
 def bash(command: str) -> str:

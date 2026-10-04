@@ -4,8 +4,10 @@ It goes at the END of the message list so the stable prefix in front of it
 stays cached.
 """
 
+import hashlib
 import subprocess
 from datetime import datetime
+from pathlib import Path
 
 LABELS = {"M": "modified", "D": "deleted", "A": "added", "??": "new"}
 
@@ -18,20 +20,28 @@ def git(command):
     return result.stdout
 
 
-def git_status():
-    """path -> status code, straight from git."""
-    return {line[3:]: line[:2].strip() for line in git("status --porcelain").splitlines()}
+def file_hash(path):
+    file = Path(path)
+    return hashlib.md5(file.read_bytes()).hexdigest() if file.is_file() else None
 
 
-LAST_STATUS = git_status()
+def git_state():
+    """path -> (status, content hash) for every file git sees as changed."""
+    state = {}
+    for line in git("status --porcelain").splitlines():
+        path = line[3:]
+        state[path] = (line[:2].strip(), file_hash(path))
+    return state
+
+LAST_STATE = git_state()
 
 
 def file_changes():
     """What git sees as different since the previous turn."""
-    global LAST_STATUS
-    now = git_status()
-    changed = {p: c for p, c in now.items() if LAST_STATUS.get(p) != c}
-    LAST_STATUS = now
+    global LAST_STATE
+    now = git_state()
+    changed = {p: c for p, c in now.items() if LAST_STATE.get(p) != c}
+    LAST_STATE = now
     return changed
 
 
