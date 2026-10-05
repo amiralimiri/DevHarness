@@ -46,7 +46,7 @@ class UI:
             Rule(Text(" coding agent ", style=f"bold {ACCENT}"), style=MUTED)
         )
         self.console.print(
-            Padding(Text(f"sandbox: {sandbox_name}  ·  opt-enter for a newline  ·  ctrl-d to exit", style=MUTED), (0, 0, 0, 2))
+            Padding(Text(f"sandbox: {sandbox_name}  ·  alt-enter for a newline  ·  ctrl-d to exit", style=MUTED), (0, 0, 0, 2))
         )
 
     def clear(self):
@@ -125,7 +125,7 @@ class UI:
             )
         )
 
-    def tool(self, name, args, result):
+    def tool(self, name, args, result, nested=False):
         if name == "write_todos" and args.get("todos"):
             return self.todos(args["todos"])
 
@@ -140,7 +140,22 @@ class UI:
                     border_style=MUTED,
                     padding=(0, 1),
                 ),
-                (1, 2, 0, 2),
+                (1, 2, 0, 6 if nested else 2),
+            )
+        )
+
+    def subagent(self, description):
+        """Shown to you, never to the main agent - it only gets the report."""
+        self.console.print(
+            Padding(
+                Panel(
+                    Text(description.strip(), style=MUTED),
+                    title=Text("subagent · own context", style=f"bold {ACCENT}"),
+                    title_align="left",
+                    border_style=ACCENT,
+                    padding=(0, 1),
+                ),
+                (1, 2, 0, 4),
             )
         )
 

@@ -1,18 +1,16 @@
-import json
 import argparse
-from openai.types.chat import ChatCompletionMessageToolCall
 
-from devharness import commands
-from devharness import compact
-from devharness import history
-from devharness import session
+from . import commands
+from . import compact
+from . import history
+from . import session
 
-from devharness.context import reminder
-from devharness.llm import SYSTEM_PROMPT, call_llm
-from devharness.permissions import check
-from devharness.todos import active_form
-from devharness.tools import TOOLS
-from devharness.ui import ui
+from .context import reminder
+from .llm import SYSTEM_PROMPT, call_llm
+from .permissions import check
+from .todos import active_form
+from .tools import execute
+from .ui import ui
 
 
 def main():
@@ -68,28 +66,8 @@ def main():
                 break
 
             for tool_call in message.tool_calls:
-                if isinstance(tool_call, ChatCompletionMessageToolCall):
-                    args = json.loads(tool_call.function.arguments)
-                    tool_name = tool_call.function.name
-                    
-                    action, reason = check(tool_name, args)
-                    if action == "deny":
-                        result = f"Blocked by policy: {reason}"
-                    elif action == "ask" and not ui.approve(reason):
-                        result = "The user denied this tool call."
-                    elif tool_name not in TOOLS:
-                        result = (
-                            f"Error: tool '{tool_name}' is not available. "
-                            f"Available tools: {list(TOOLS.keys())}"
-                        )
-                    else:
-                        try:
-                            result = TOOLS[tool_call.function.name](**args)
-                        except Exception as e:
-                            result = f"Error running {tool_name}: {type(e).__name__}: {e}"
-                    ui.tool(tool_call.function.name, args, result)
-                else:
-                    print("Custom tool call detected")
+                args, result = execute(tool_call)
+                ui.tool(tool_call.function.name, args, result) # type: ignore
 
                 messages.append({
                     "role": "tool",

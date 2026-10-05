@@ -4,11 +4,11 @@ import os
 from openai import OpenAI
 from openai.types.chat import ChatCompletionMessageToolCall
 
-from devharness import config
-from devharness.skills import skills_prompt
-from devharness.tools import TOOLS, TOOL_SCHEMAS
+from . import config
+from .skills import skills_prompt
+from .tools import TOOLS, TOOL_SCHEMAS
 
-# print("########################## ", config.BASE_URL, " ##########################")
+
 client = OpenAI(
     base_url=config.BASE_URL,
     api_key=config.API_KEY,
@@ -32,6 +32,13 @@ at the end. Skip the tool entirely for single-step tasks; it is noise there.
 The current list is injected back to you every turn inside <todos> tags, so
 that block - not the transcript - is the truth about where you are.
 
+When you need to understand how something works - where a feature lives, how
+data flows, what calls what - send a task subagent instead of grepping your
+way there yourself. It explores in its own context window and hands you back
+just the findings, so the search does not fill yours. It cannot see this
+conversation, so write the question so it stands alone. Do all editing
+yourself; the subagent only reads.
+
 Long tool output is cut short, and the whole thing is written to a temp file
 whose path is given at the cut. Page through it with head, tail, sed -n or
 grep rather than asking for it again. That file only exists for the current
@@ -46,11 +53,11 @@ If a skill matches what the user wants, call read_skill first and follow it.
 """
 
 
-def call_llm(messages):
+def call_llm(messages, tools=None):
     response = client.chat.completions.create(
         model=config.MODEL,
         messages=messages,
-        tools=TOOL_SCHEMAS, # type: ignore
+        tools=tools or TOOL_SCHEMAS, # type: ignore
     )
 
     message = response.choices[0].message

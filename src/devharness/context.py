@@ -9,7 +9,7 @@ import subprocess
 from datetime import datetime
 from pathlib import Path
 
-from devharness.todos import todos_prompt
+from .todos import todos_prompt
 
 
 LABELS = {"M": "modified", "D": "deleted", "A": "added", "??": "new"}

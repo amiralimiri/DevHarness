@@ -9,9 +9,9 @@ deep - trimming just enough to fit would put us back over the line next turn,
 and every trim costs the whole prompt cache.
 """
 
-from devharness import config
-from devharness.history import estimate, strip
-from devharness.llm import client
+from . import config
+from .history import estimate, strip
+from .llm import client
 
 SYSTEM_PROMPT = """
 You are compacting the transcript of a coding session. The session is out of

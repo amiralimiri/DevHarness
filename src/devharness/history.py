@@ -21,7 +21,7 @@ import json
 import tempfile
 from pathlib import Path
 
-from devharness import config
+from . import config
 
 CAP = 10_000  # chars of a fresh tool result the agent sees inline
 STUB = 300  # chars kept once the turn that produced it is over
@@ -50,7 +50,12 @@ def cap(text):
     if len(text) <= CAP:
         return text
 
-    path = spill(text)
+    try:
+        path = spill(text)
+    except OSError:
+        # No temp file (read-only /tmp, no space). Still better to trim and
+        # say so than to fail the tool call outright.
+        return text[:CAP] + f"\n\n{TRIMMED} {len(text) - CAP} chars cut and the rest could not be saved.]"
     return (
         text[:CAP] + f"\n\n{TRIMMED} {len(text) - CAP} of {len(text)} chars cut. "
         f"The whole output is at {path} - page through it with "

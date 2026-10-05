@@ -51,7 +51,13 @@ def load(session_id):
     """Replay the log: messages accumulate, rewinds cut them back."""
     messages = []
     for line in path_for(session_id).read_text(encoding="utf-8").splitlines():
-        entry = json.loads(line)
+        try:
+            entry = json.loads(line)
+        except json.JSONDecodeError:
+            # A half-written last line, usually from a kill mid-save. Skipping
+            # it costs one message; raising would break /sessions for every
+            # chat in the project, because listing them all calls load().
+            continue
         if "rewind_to" in entry:
             del messages[entry["rewind_to"]:]
         elif "compacted" in entry:
