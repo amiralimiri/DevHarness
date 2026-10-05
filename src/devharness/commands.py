@@ -15,13 +15,22 @@ def preview(message):
     return " ".join(str(message.get("content") or "").split())[:70]
 
 
+def redraw(messages, label):
+    """The screen no longer matches the history, so wipe it and draw again."""
+    ui.clear()
+    ui.banner()
+    ui.resumed(messages, label)
+    ui.replay(messages)
+    return messages
+
+
 def rewind(messages):
     rows = [f"{m['role']:<9} {preview(m)}" for m in messages]
     choice = ui.pick("rewind to", rows)
     if choice is None:
         return messages
     session.rewind_to(choice + 1)
-    return messages[: choice + 1]
+    return redraw(messages[: choice + 1], "rewound")
 
 
 def sessions(messages):
@@ -31,7 +40,9 @@ def sessions(messages):
         return messages
     rows = [f"{s['id']}  {s['title']}" for s in saved]
     choice = ui.pick("open chat", rows)
-    return messages if choice is None else session.open_session(saved[choice]["id"])
+    if choice is None:
+        return messages
+    return redraw(session.open_session(saved[choice]["id"]), "opened")
 
 
 def handle(command, messages):
