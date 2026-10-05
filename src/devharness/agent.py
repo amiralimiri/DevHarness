@@ -2,8 +2,11 @@ import json
 import argparse
 from openai.types.chat import ChatCompletionMessageToolCall
 
-import devharness.commands as commands
-import devharness.session as session
+from devharness import commands
+from devharness import compact
+from devharness import history
+from devharness import session
+
 from devharness.context import reminder
 from devharness.llm import SYSTEM_PROMPT, call_llm
 from devharness.permissions import check
@@ -25,7 +28,9 @@ def main():
         saved = session.all_sessions()
         if saved:
             messages = session.open_session(saved[0]["id"])
+            history.strip(messages)
             ui.resumed(messages)
+            ui.replay(messages)
 
     while True:
         user_input = ui.ask()
@@ -42,6 +47,9 @@ def main():
         while True:
             injection = reminder()
             ui.injection(injection["content"])
+            
+            if history.fit(messages):
+                ui.note("dropped old tool output to make this request fit")
 
             with ui.working(active_form()):
                 message, usage = call_llm(messages + [injection])
@@ -90,6 +98,13 @@ def main():
                 })
                 session.save(messages)
 
+        history.sweep()   # the turn is over: bin its temp files
+        history.strip(messages)  # ...and shrink the tool output it produced
+
+        if compact.needed(usage):
+            messages = commands.compact(messages)
+            
+            
     ui.summary()
     
 if __name__ == "__main__":

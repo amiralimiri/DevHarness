@@ -1,11 +1,13 @@
 """Slash commands. Anything typed starting with / lands here."""
 
+from devharness import compact as compaction
 import devharness.session as session
 from devharness.ui import ui
 
 COMMANDS = {
     "/rewind": "jump back to an earlier point in this chat",
     "/sessions": "open a past chat",
+    "/compact": "summarise the history so far and free up the context window",
 }
 
 
@@ -44,8 +46,20 @@ def sessions(messages):
         return messages
     return redraw(session.open_session(saved[choice]["id"]), "opened")
 
+def compact(messages):
+    before = len(messages)
+    with ui.working("compacting"):
+        compacted = compaction.compact(messages)
+    if len(compacted) == before:
+        ui.note("nothing old enough to compact yet")
+        return messages
+    session.compacted(compacted)
+    ui.compacted(before, compacted)
+    return compacted
 
 def handle(command, messages):
+    if command == "/compact":
+        return compact(messages)
     if command == "/rewind":
         return rewind(messages)
     if command == "/sessions":

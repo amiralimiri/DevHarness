@@ -16,8 +16,8 @@ from rich.rule import Rule
 from rich.table import Table
 from rich.text import Text
 
-from devharness import prompt
-from devharness.todos import MARKS
+from . import prompt
+from .todos import MARKS
 
 ACCENT = "#7aa2f7"
 USER = "#9ece6a"
@@ -205,6 +205,27 @@ class UI:
         self.console.print(Padding(table, (1, 2)))
         self.console.print(Rule(style=MUTED))
         self.console.print()
+
+    def compacted(self, before, messages):
+        summary = next(
+            (m["content"] for m in messages if "<summary>" in (m.get("content") or "")),
+            "",
+        )
+        self.console.print(
+            Padding(
+                Panel(
+                    Markdown(summary.replace("<summary>", "").replace("</summary>", "")),
+                    title=Text(
+                        f"compacted · {before} → {len(messages)} messages",
+                        style=f"bold {TOOL}",
+                    ),
+                    title_align="left",
+                    border_style=TOOL,
+                    padding=(0, 1),
+                ),
+                (1, 2, 0, 2),
+            )
+        )
 
     def todos(self, todos):
         """The plan, as a checklist. The raw tool output is never worth showing."""

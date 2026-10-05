@@ -32,6 +32,11 @@ at the end. Skip the tool entirely for single-step tasks; it is noise there.
 The current list is injected back to you every turn inside <todos> tags, so
 that block - not the transcript - is the truth about where you are.
 
+Long tool output is cut short, and the whole thing is written to a temp file
+whose path is given at the cut. Page through it with head, tail, sed -n or
+grep rather than asking for it again. That file only exists for the current
+turn, so read it now or re-run the command later.
+
 Your current working directory is: {os.getcwd()}
 
 You have skills available. Each one is a set of instructions for a task.

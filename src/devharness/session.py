@@ -39,6 +39,14 @@ def rewind_to(count):
     WRITTEN = count
 
 
+def compacted(messages):
+    """Compaction rewrites history, so record the result and start from it."""
+    global WRITTEN
+    with path_for(CURRENT).open("a") as f:
+        f.write(json.dumps({"compacted": messages}) + "\n")
+    WRITTEN = len(messages)
+    
+    
 def load(session_id):
     """Replay the log: messages accumulate, rewinds cut them back."""
     messages = []
@@ -46,6 +54,8 @@ def load(session_id):
         entry = json.loads(line)
         if "rewind_to" in entry:
             del messages[entry["rewind_to"]:]
+        elif "compacted" in entry:
+            messages = list(entry["compacted"])
         else:
             messages.append(entry)
     return messages

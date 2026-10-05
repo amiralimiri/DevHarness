@@ -1,5 +1,6 @@
 import subprocess
 
+from devharness import history
 from devharness.skills import read_skill
 from devharness.todos import TODO_SCHEMA, write_todos
 
@@ -12,13 +13,13 @@ def bash(command: str) -> str:
     )
     stdout = result.stdout or ""
     stderr = result.stderr or ""
-    return (stdout + stderr) or "(no output)"
+    return history.cap((stdout + stderr) or "(no output)")
 
 
 def read_file(path: str) -> str:
     """Read a file and return its contents."""
     with open(path, encoding="utf-8") as f:
-        return f.read()
+        return history.cap(f.read())
 
 
 def write_file(path: str, content: str) -> str:
